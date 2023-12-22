@@ -4,16 +4,25 @@ import std.string;
 import std.typecons;
 import std.range;
 
+enum Alignment
+{
+    Left,
+    Right,
+    Center
+}
+
 class TableHeader
 {
     ulong columnSize;
     string header;
+    Alignment alignment;
 
-    this(string header, Nullable!ulong columnSize)
+    this(string header, Nullable!ulong columnSize, Alignment alignment)
     {
         ulong computedColumnsize = !columnSize.isNull ? columnSize.get : header.length;
         this.columnSize = computedColumnsize;
         this.header = header;
+        this.alignment = alignment;
     }
 }
 
@@ -30,17 +39,20 @@ class TableRow
 void main()
 {
     TableHeader[] headers = [
-        new TableHeader("Name", cast(Nullable!ulong) 20),
-        new TableHeader("Age", cast(Nullable!ulong) 3),
-        new TableHeader("Address", cast(Nullable!ulong) 20),
-        new TableHeader("City", cast(Nullable!ulong) 10),
-        new TableHeader("State", cast(Nullable!ulong) 2),
-        new TableHeader("Country", cast(Nullable!ulong) 2),
+        new TableHeader("Name", cast(Nullable!ulong) 30, Alignment.Left),
+        new TableHeader("Age", cast(Nullable!ulong) 3, Alignment.Right),
+        new TableHeader("Address", cast(Nullable!ulong) 30, Alignment.Left),
+        new TableHeader("City", cast(Nullable!ulong) 13, Alignment.Left),
+        new TableHeader("State", cast(Nullable!ulong) 2, Alignment.Center),
+        new TableHeader("Country", cast(Nullable!ulong) 2, Alignment.Center),
     ];
 
     TableRow[] rows = [
         new TableRow([
             "Sean Galland", "43", "123 Park Place", "Lytton", "CA", "US"
+        ]),
+        new TableRow([
+            "Josh Tallarion", "18", "456 Peekaboo Lane", "Jersey City", "NJ", "US"
         ]),
         new TableRow([
             "Joshua Dominick Jones", "36", "3501 West Park Place", "Seattle", "WA",
@@ -50,7 +62,11 @@ void main()
             "Enrique Englesias Shapiro III", "26", "293 South Westville Ave",
             "San Franciso",
             "CA", "US"
-        ])
+        ]),
+        new TableRow([
+            "Jason Williams", "101", "69588 Westlane Road", "Chicago", "IL",
+            "US"
+        ]),
     ];
 
     for (int header_index = 0; header_index < headers.length; header_index++)
@@ -82,7 +98,10 @@ void main()
                 : column_data.length;
             ulong columnSize = header.columnSize > header.header.length ? header.columnSize
                 : header.header.length;
-            write("| ", leftJustify(column_data[0 .. trimToSize], columnSize, ' '), ' ');
+            auto adjustedOutput = header.alignment == Alignment.Left ? leftJustify(column_data[0 .. trimToSize], columnSize, ' ') : header
+                .alignment == Alignment.Center ? center(column_data[0 .. trimToSize], columnSize, ' ') : rightJustify(
+                    column_data[0 .. trimToSize], columnSize, ' ');
+            write("| ", adjustedOutput, ' ');
         }
         writeln("|");
     }
